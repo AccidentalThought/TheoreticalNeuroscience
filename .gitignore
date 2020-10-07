@@ -1,0 +1,8 @@
+book
+exercises
+__pycache__
+.vscode
+drafts.py
+
+*.pyc
+*.mat
