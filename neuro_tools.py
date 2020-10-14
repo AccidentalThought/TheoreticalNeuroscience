@@ -309,6 +309,27 @@ def poisson_spike_generator(duration, rate_bound, rate=None):
     return np.array(new_times)
 
 
+def poisson_response_generator(rate, time_step):
+    """Returns array of neuronal responses in given time bins
+
+    Function compares the values rate*time_step in each bin with random
+    values in range [0,1)
+
+    Arguments:
+        rate: array of firing rate values in Hz in given time bins
+
+        time_step: float representing the time step in seconds 
+
+    Returns:
+        response: array of zeros and ones, where zero = no response
+                  one = generated spike
+    """
+    assert rate.max()*time_step < 1, "Warning! Time step is too small"
+    rng = np.random.default_rng()
+    random_values = rng.random(rate.size)
+    return (rate*time_step > random_values).astype(int)
+
+
 def approximate_rate(t, spikes, tau, init_rate):
     """Returns firing rate in given time(s) based on decay equation and spikes.
 
