@@ -13,7 +13,8 @@ Implementing of solutions is done in python *.py files, discussion and mathemati
 * Add theoretical results in plots?
 * Aim of the solutions is purely educational, therefore some parts are slower
     for the sake of understandability over the optimization
-
+* There is an interesting phenomenon with Fano factors. For small bins it is always very close to 1 for Poisson process, although for bigger bins it usually tends away from one, even for longer durations. Is this reasonable or is there problem in implementation? 
+* Presentation of the solution is changing quite a bit, when there is time I will try to unify it, in the mean time I am sorry for the mess
 
 ## Questions
 1) What holds synapses together? Why are they stuck close together?

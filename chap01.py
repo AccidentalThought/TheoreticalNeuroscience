@@ -13,24 +13,20 @@ def exercise1(duration = 10,  # seconds
               fano_countings = np.arange(1, 101)/1000,  # seconds
               hist_bins = 50, # number
               ):
-    """
-    Exercise 1:
-
-    Generate spikes for 10 s (or longer if you want better statistics) using
-    a Poisson spike generator with a constant rate of 100 Hz, and record
-    their times of occurrence. Compute the coefficient of variation of the
-    interspike intervals, and the Fano factor for spike counts obtained
-    over counting intervals ranging from 1 to 100 ms. Plot the interspike
-    interval histogram.
-    """
-
     # Generating spikes
     spike_times = nt.poisson_spike_generator(duration, firing_rate)
     spikes = nt.SpikeTrain(duration, spike_times)
     # Coefficient of variation
     print("Coefficient of variation: {}".format(spikes.coefficient_of_variation()))
     # Fano factor:
-    print("Fano Factor: {}".format(spikes.fano_factor(fano_countings)))
+    if type(fano_countings) in [int, float] or len(fano_countings) < 10:
+        print("Fano Factors: {}".format(spikes.fano_factor(fano_countings)))
+    else:
+        plt.plot(fano_countings*1000, spikes.fano_factor(fano_countings))
+        plt.plot(fano_countings[[0,-1]]*1000, np.ones(2))
+        plt.title("Fano Factors")
+        plt.xlabel("Counting interval [ms]")
+        plt.show()
     # Interspike interval histogram
     spikes.plot_interspike_interval_histogram(hist_bins)
     plt.show()
@@ -208,24 +204,6 @@ def exercise4(duration = 10,  # seconds
     plt.plot(times, nt.approximate_rate(times, spikes.spikes, tau_approx,
              init_rate))
     plt.show()
-
-
-def exercise5(m = 10,  # number of bins in 1%
-              n = 10,  # total number of spikes
-             ):
-    """
-    Exercise 5:
-
-    For a constant rate Poisson process, every specific (up to a finite
-    resolution) sequence of N spikes occurring over a given time interval
-    is equally likely. This seems paradoxical because we certainly do not
-    expect to see all N spikes appearing within the first 1% of the time
-    interval. Resolve this paradox.
-    """
-    val = 1
-    for k in range(n):
-        val = val*((m-k)/(100*m-k))
-    return val
 
 
 def exercise6(duration = 10,  # seconds
