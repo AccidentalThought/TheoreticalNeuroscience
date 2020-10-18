@@ -389,3 +389,48 @@ def load_c1p8():
     response = data['rho'][:,0]  # rho - response, 0 - nothing, 1 - spike
     stimulus = data['stim'][:,0]  # stim - stimulus at a certain point
     return response, stimulus
+
+
+def gaussian_white_noise(sigma, duration, time_step):
+    """Generates Gaussian white noise with given sigma
+
+    Variance of generated noise is: 
+            sigma**2/time_step 
+    """
+    rng = np.random.default_rng()
+    bins = int(duration/time_step)
+    noise_std = sigma/np.sqrt(time_step)
+    stim = noise_std*rng.standard_normal(bins)
+    return stim - stim.mean()
+
+
+def cyclic_conv(signal, kernel, mode='valid'):
+    """Standard convolution with additional assumption that signal is cyclic
+
+    A way to get rid of boundary effects in convolution is the assumption
+    that given signal is cyclic. Function replicated the signal so it appears
+    cyclic and then proceeds with standard numpy convolution
+    """
+    signal = np.concatenate((signal[-kernel.size+1:], signal))
+    return np.convolve(signal, kernel, mode=mode)
+
+
+def cyclic_corr(signal, kernel, mode='valid'):
+    """Standard correlation with additional assumption that signal is cyclic
+
+    A way to get rid of boundary effects in correlation is the assumption
+    that given signal is cyclic. Function replicated the signal so it appears
+    cyclic and then proceeds with standard numpy correlation
+
+    Signal and kernel has to be of the same size!
+
+    Takes kernel duplicates by adding copy at the end then call numpy
+    correlation function which check sizes of kernel and signal, therefore,
+    the assertion of sizes. The correlation result is then shifted so that
+    the result at time=0 is in the middle (since this operation is cyclic
+    this shift is correct)
+    """
+    assert signal.size == kernel.size, "Check sizes of the signals!"
+    kernel = np.concatenate((kernel, kernel[:signal.size-1]))
+    return np.roll(np.correlate(kernel, signal, mode=mode), signal.size//2)
+
