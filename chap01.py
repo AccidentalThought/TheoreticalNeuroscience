@@ -251,60 +251,33 @@ def exercise7(tau = 0.02,  # seconds
               sigma = 1,  # variability of white noise
               adjust_signal = True,
              ):
-    """
-    Exercise 7:
-
-    Consider a model with a firing rate determined in terms of a stimulus
-    s(t) by integrating the equation
-
-    τ_r * (dr_est(t)/dt) = [r_0 + s]_+ − r_est(t),
-
-    where r_0 is a constant that determines the background firing rate and
-    τ_r = 20 ms. Drive the model with an approximate white-noise stim-
-    ulus. Adjust the amplitude of the white-noise and the parameter r_0
-    so that rectification is not a big effect (i.e. r_0 + s > 0 most of the time).
-    From the responses of the model, compute the stimulus-response cor-
-    relation function, Q_rs . Next, generate spikes from this model using a
-    Poisson generator with a rate r_est(t), and compute the spike-triggered
-    average stimulus from the spike trains produced by the white-noise
-    stimulus. By comparing the stimulus-response correlation function
-    with the spike-triggered average, verify that equation 1.22 is satis-
-    fied. Examine what happens if you set r_0 = 0, so that the white-noise
-    stimulus becomes half-wave rectified.
-    """
-
     # NOTE: adjust_signal:
     # if True, sigma will be adjusted so that s+r0 > 0 most of the time
     # NOTE: max_time:
     # time limit for evaluation of spike triggered average
 
-    # Adjusting noise properties so that rectification is not a big effect
     if adjust_signal and np.sqrt(time_step)*r0 < 3*sigma:
+        # Adjusting noise properties so that rectification is not a big effect
         # Gaussian white noise, r0>= 3*std means r0>s most of the time
-        noise_std = r0/3
         sigma = np.sqrt(time_step)*r0/3
-    else:
-        noise_std = sigma/np.sqrt(time_step)
 
     # Generate noise
-    rng = np.random.default_rng()
-    bins = int(duration/time_step)
-    wnstim = noise_std*rng.standard_normal(bins)
+    wnstim = nt.gaussian_white_noise(sigma, duration, time_step)
 
     # Firing rate, using Euler explicit method solution:
-    rate = np.empty(bins)
+    rate = np.empty_like(wnstim)
     rate[0] = r0  # initial value, r0 is the solution for no stimulus
-    for i in range(1, bins):
+    for i in range(1, wnstim.size):
         rate[i] = rate[i-1] + time_step/tau*(max(r0+wnstim[i-1], 0)-rate[i-1])
 
     # stimulus- response correlation
-    rs_corr = np.correlate(np.concatenate((wnstim, wnstim)), rate)[::-1]/bins
+    rs_corr = nt.cyclic_corr(rate, wnstim)/wnstim.size
     plt.plot(rs_corr)
     plt.title("Stimulus-response correlation")
     plt.show()
 
     # Generates spikes using r_est(), Poisson process
-    response = np.zeros(bins)
+    response = np.zeros_like(wnstim)
     for i in range(trials):
         response += nt.poisson_response_generator(rate, time_step)
     response = response/trials
@@ -312,14 +285,16 @@ def exercise7(tau = 0.02,  # seconds
     # Spike triggered average
     n = response.sum()
     time_bins = int(max_time/time_step)
-    sta = np.correlate(np.concatenate((wnstim[-time_bins:], wnstim)),
+    sta_times = np.arange(-max_time, 0, time_step) + time_step
+    sta = np.correlate(np.concatenate((wnstim[-time_bins+1:], wnstim)),
                        response)/n
 
     # Verify equation 1.22
     # C(tau) = 1/<r> * Q_rs(-tau), where C is spike-triggered average
-    plt.plot(sta, label="Spike triggered average")
-    plt.plot(rs_corr[:time_bins+1][::-1]/rate.mean(),
-             label="Rate-stim correlation")
+    plt.plot(sta_times, sta, label="Spike triggered average")
+    t_zero = rs_corr.size//2 + 1  # index of the time = 0
+    relevant_part = rs_corr[t_zero-sta_times.size:t_zero]/rate.mean()
+    plt.plot(sta_times, relevant_part, label="Rate-stim correlation")
     plt.legend()
     plt.show()
 
