@@ -396,6 +396,8 @@ def gaussian_white_noise(sigma, duration, time_step):
 
     Variance of generated noise is: 
             sigma**2/time_step 
+   
+    Based on the book, page 23
     """
     rng = np.random.default_rng()
     bins = int(duration/time_step)

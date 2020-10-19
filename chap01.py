@@ -221,24 +221,15 @@ def exercise6(duration = 10,  # seconds
     ideal white-noise stimulus given the value of ∆t you used.
     """
     # Gaussian white noise stimulus generation
-    # Based on the book page 23
-    bins = int(duration/time_step)
-    s = sigma/(time_step**0.5)
-    rng = np.random.default_rng()
-    wns = s*rng.standard_normal(bins)
-
+    wns = nt.gaussian_white_noise(sigma, duration, time_step)
+    
     # Autocorrelation
-    # very inefficient code, done mostly for the fun of 
-    # cc = (wns*wns[np.arange(bins)-np.arange(bins)[:,np.newaxis]]).sum(axis=1)/bins
     if cyclic_stimulus:
-        wns_cyclic = np.concatenate((wns, wns))  # Double the array
-        autocorr = np.correlate(wns_cyclic,wns)[:-1]
-        autocorr = autocorr/bins
+        autocorr = nt.cyclic_corr(wns, wns)/wns.size
     else:
-        autocorr = np.correlate(wns,wns, mode='full')
-        autocorr = autocorr[autocorr.argmax():]/bins
+        autocorr = np.correlate(wns,wns, mode='same')
 
-    plt.plot(autocorr)
+    plt.plot(np.arange(-duration//2,duration//2, time_step), autocorr)
     plt.title("Autocorrelation of the generated white noise")
     plt.xlabel("time shift [seconds]")
     plt.show()
