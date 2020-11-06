@@ -391,6 +391,22 @@ def load_c1p8():
     return response, stimulus
 
 
+def load_c2p3():
+    """Returns tuple of arrays with response and stimulus in given times
+
+    Returns:
+        counts: array of neuron's responses with number of spikes in given
+                time bin
+
+        stimulus: array of stimulus values, 
+                  shape (16,16,32767) = (x, y, t)
+    """
+    data = loadmat("data/c2p3.mat")
+    counts = data['counts'][:,0]  # number of spikes in given time bin
+    stimulus = data['stim']  # stim - stimulus at a certain point
+    return counts, stimulus
+
+
 def gaussian_white_noise(sigma, duration, time_step):
     """Generates Gaussian white noise with given sigma
 

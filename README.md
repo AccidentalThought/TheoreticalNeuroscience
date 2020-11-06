@@ -8,6 +8,11 @@ Used data for and list of problems are available at official [website][Exercises
 
 Implementing of solutions is done in python *.py files, discussion and mathematical derivation are written in *.ipynb files (because of the math support).
 
+## ToDo
+* Problem c2p2 gives weird result
+* Problem c2p6 wrong mathematical result
+
+
 ## Notes
 * Would be nice to track units with the variables
 * Add theoretical results in plots?
@@ -28,5 +33,5 @@ Implementing of solutions is done in python *.py files, discussion and mathemati
 Other people's attempts
 https://github.com/phvu/theoretical-neuroscience
 
-
+https://github.com/Ullas25/Theoretical-Neuroscience
 

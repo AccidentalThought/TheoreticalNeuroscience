@@ -3,6 +3,7 @@ exercises
 __pycache__
 .vscode
 drafts.py
+drafts.md
 
 *.pyc
 *.mat
