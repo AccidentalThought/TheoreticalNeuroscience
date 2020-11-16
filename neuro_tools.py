@@ -5,6 +5,7 @@ Collection of useful functions related to the exercises
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import loadmat
+from math import factorial
 
 class SpikeTrain(object):
     """Object representing spike train

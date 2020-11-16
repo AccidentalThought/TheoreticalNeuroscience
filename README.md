@@ -8,9 +8,15 @@ Used data for and list of problems are available at official [website][Exercises
 
 Implementing of solutions is done in python *.py files, discussion and mathematical derivation are written in *.ipynb files (because of the math support).
 
+
 ## ToDo
-* Problem c2p2 gives weird result
-* Problem c2p6 wrong mathematical result
+* Problem c2p2 gives weird result Not sure where is the problem
+* Problem cpp6 - would be nice make animation of L_t(t)
+
+
+## Done
+* chapter 1 - whole
+* chapter 2 - 1, 3, 4, 5
 
 
 ## Notes
@@ -34,4 +40,6 @@ Other people's attempts
 https://github.com/phvu/theoretical-neuroscience
 
 https://github.com/Ullas25/Theoretical-Neuroscience
+
+https://github.com/platycristate/computational-neuroscience
 

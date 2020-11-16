@@ -89,6 +89,7 @@ def exercise2(duration = 20*60,  # seconds
 
 
 def exercise3(time_bin = 15.6,  # ms
+              plot_animation = True,  # Flag for plot
              ):
     counts, stim = nt.load_c2p3()  # load data
     n = counts.sum()  # number of spikes
@@ -120,17 +121,18 @@ def exercise3(time_bin = 15.6,  # ms
     plt.ylabel("x")
     plt.colorbar()
     plt.show()
+    
+    if plot_animation:
+        fig = plt.figure()
+        ims = []
+        for i in range(1, 13):
+            im = plt.imshow(sta[:,:,-i], animated=True, cmap='jet', 
+                            vmin = sta.min(), vmax=sta.max())
+            ims.append([im])
 
-    fig = plt.figure()
-    ims = []
-    for i in range(1, 13):
-        im = plt.imshow(sta[:,:,-i], animated=True, cmap='jet', 
-                        vmin = sta.min(), vmax=sta.max())
-        ims.append([im])
-
-    ani = animation.ArtistAnimation(fig, ims, interval=1000, blit=True, repeat=True)
-    plt.colorbar()
-    plt.show()
+        ani = animation.ArtistAnimation(fig, ims, interval=1000, blit=True, repeat=True)
+        plt.colorbar()
+        plt.show()
 
 
 def exercise5(lam = 1.2,  # cm, constant for the map
@@ -179,4 +181,84 @@ def exercise5(lam = 1.2,  # cm, constant for the map
     plt.ylabel('degrees')
 
     plt.tight_layout()
+    plt.show()
+
+
+def exercise6():
+    # Implementation of a spatial linear estimate
+    def spatial_linest(spatial_phase, orientation, spatial_freq_ratio,
+                    ksigma=2, pref_phase=0, amplitude=1):
+        expfac = np.exp(-ksigma**2/2*(1+spatial_freq_ratio**2))
+        val = ksigma**2*spatial_freq_ratio*np.cos(orientation)
+        first_cos = np.cos(pref_phase-spatial_phase)*np.exp(val)
+        second_cos = np.cos(pref_phase+spatial_phase)*np.exp(-val)
+        return amplitude/2*expfac*(first_cos+second_cos)
+
+    # Implementations of temporal linear estimate
+
+    # Given result in exercises
+    def given_res(alpha, omega, t):
+        lam = omega/alpha
+        frac = lam*np.sqrt(4+lam**2)/((1+lam**2)**4)
+        delta = 8*np.arctan(lam) + np.arctan(2/lam) - np.pi
+        return frac*np.cos(omega*t-delta)
+
+    # Implementation of purely numerical solution
+    def numerical_solution(alpha, omega, t, step = 0.01, max_tau=100):
+        lam = omega/alpha
+        taus = np. arange(0, max_tau*alpha, step)
+        if type(t) == np.ndarray:
+            taus = taus[np.newaxis,]
+            t = t[:,np.newaxis]
+        vals = np.cos(omega*t-lam*taus)*np.exp(-taus)*((taus**5)/factorial(5)-(taus**7)/factorial(7))
+        return (vals.sum(axis=1)- (vals[:,0] + vals[:,-1])/2)*step
+
+    # My slightly different result, gives the same numbers nonetheless
+    def my_res(alpha, omega, t):
+        lam = omega/alpha
+        arc = np.arctan(lam)
+        t = omega*t
+        return (np.cos(t-6*arc) - np.cos(t-8*arc)/(1+lam**2))/((1+lam**2)**(3))
+
+    # Replicating Figure 2.15
+    # Figure A
+    plt.subplot(131)
+    orientations = np.linspace(-np.pi/2, np.pi/2)
+    spl_a = spatial_linest(spatial_phase=0, orientation=orientations, spatial_freq_ratio=1)
+    plt.plot(orientations, spl_a)
+    plt.xlabel(r"$\Theta$")
+    # B
+    plt.subplot(132)
+    spfreq_ratios = np.linspace(0, 3)
+    spl_b = spatial_linest(spatial_phase=0, orientation=0, spatial_freq_ratio=spfreq_ratios)
+    plt.plot(spfreq_ratios, spl_b)
+    plt.xlabel(r"$K/k$")
+    # C
+    plt.subplot(133)
+    sp_phases = np.linspace(-np.pi, np.pi)
+    spl_c = spatial_linest(spatial_phase=sp_phases, orientation=0, spatial_freq_ratio=1)
+    plt.plot(sp_phases, spl_c)
+    plt.xlabel(r"$\Phi$")
+    plt.show()
+
+
+    # Figure 2.16
+    freqs = np.linspace(0, 20, 100)
+    # Alpha figure 2.14 1/15 ms-1 = 1/0.015 s-1
+    alpha = 1/0.015
+    t = 0.05 # is the best
+    plt.plot(freqs, given_res(alpha, 2*np.pi*freqs, t))
+    plt.title(f"t = {t} s")
+    plt.xlabel("frequency [Hz]")
+    plt.show()
+
+    # Figure delta(omega)
+    omegas = np.linspace(0, 10*np.pi, 1000)
+    lams = omegas/alpha
+    deltas = 8*np.arctan(lams) + np.arctan(2/lams) - np.pi
+    # at omega=0 it is not defined, there a jump of size pi
+    plt.plot(omegas, deltas, label=r"$\delta(\omega)$")
+    plt.plot(omegas[[0,-1]], deltas[[0,-1]], "r", label="linear function")
+    plt.legend()
+    plt.xlabel(r"$\omega$ [Hz]")
     plt.show()
