@@ -16,7 +16,7 @@ Implementing of solutions is done in python *.py files, discussion and mathemati
 
 ## Done
 * chapter 1 - whole
-* chapter 2 - 1, 3, 4, 5
+* chapter 2 - 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
 
 
 ## Notes
