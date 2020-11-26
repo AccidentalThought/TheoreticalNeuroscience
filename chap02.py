@@ -501,3 +501,30 @@ def exercise12():
     plt.title("Amplitude of a response")
     plt.xlabel(r"velocity $[^\circ s^{-1}]$")
     plt.show()
+
+
+def exercise13(amplitude=1,
+              )
+    disparity = np.linspace(0, 2*np.pi, 200)
+    response = amplitude**2*(2+np.cos(disparity))
+    plt.plot(disparity, response)
+    plt.xlabel("disparity [rad]")
+    plt.title("Response of disparity tuned complex cell")
+    plt.show()
+
+
+def exercise14(sigma_c = 0.3,  # deg
+               sigma_s = 1.5,  # deg
+               b = 5,
+               alpha = 1/0.016,  # sec^-1
+               beta = 1/0.064,  # sec^-1
+              ):
+    ks = np.linspace(0,20, 200)
+    res_cen = np.exp(-(sigma_c**2)*(ks**2)/2)
+    res_sur = np.exp(-(sigma_s**2)*(ks**2)/2)
+    response = res_cen - b*res_sur
+    plt.plot(ks, response)
+    plt.title("Selectivity to spatial frequency")
+    plt.xlabel("K [$1/^\circ$]")
+    plt.show()
+
