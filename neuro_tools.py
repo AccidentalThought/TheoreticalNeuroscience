@@ -453,3 +453,60 @@ def cyclic_corr(signal, kernel, mode='valid'):
     kernel = np.concatenate((kernel, kernel[:signal.size-1]))
     return np.roll(np.correlate(kernel, signal, mode=mode), signal.size//2)
 
+
+def gabor_spatial_rf(x,y, sigma_x=1, sigma_y=1, spat_freq=2, phase=0):
+    """Spatial visual receptive field of LGN cell given as gabor filter
+    
+    Given by equation 2.27 in the textbook
+    """
+    ex = np.exp(-(x**2)/(2*sigma_x**2)-(y**2)/(2*sigma_y**2))
+    cs = np.cos(spat_freq*x-phase)
+    return ex*cs/(2*np.pi*sigma_x*sigma_y)
+
+
+def retinal_spatial_rf(x,y, sigma_c=0.3, sigma_s=1.5, b=5):
+    """Model of ON-OFF receptive field of retinal cells
+
+    given as a sum of center and surround gaussians
+    """
+
+    sigma_c = sigma_c**2
+    sigma_s = sigma_s**2
+    pos = x**2+y**2
+    cen = 1/(2*np.pi*sigma_c)*np.exp(-pos/(2*sigma_c))
+    sur = 1/(2*np.pi*sigma_s)*np.exp(-pos/(2*sigma_s))
+    return cen-b*sur
+
+
+def hubel_wiesel_simple_cell(x,y, size=0.6, sigma_c=0.3, sigma_s=1.5, b=5):
+    """Hubel Wiesel model of a simple cell
+    
+    Contructed as a sum of retinal ON-OFF simple cells
+    """
+
+    rf = np.zeros_like(x+y)
+    for shift_x in (-size,0,size):
+        if shift_x == 0:  # central column is ON
+            factor = 1
+        else:  # surrounding columns are OFF
+            factor = -1
+        for shift_y in (-size,0,size):
+            rf += factor*retinal_spatial_rf(x+shift_x,y+shift_y,sigma_c, sigma_s,b)
+    return rf
+
+
+def hubel_wiesel_complex_cell(orientation = 0,
+                             spat_freq = 2,
+                             phase1 = 0,
+                             phase2 = np.pi/2,
+                             phase3 = np.pi,
+                             phase4 = 3*np.pi/2,
+                            ):
+    xs = np.linspace(-5,5, 100)[np.newaxis]
+    ys = np.linspace(-5,5, 100)[:,np.newaxis]
+    model = np.zeros_like(xs+ys)
+    for phase in (phase1, phase2, phase3, phase4):
+        res = gabor_spatial_rf(xs, ys, spat_freq=spat_freq, phase=phase)
+        res[res<0] = 0
+        model += res
+    return model

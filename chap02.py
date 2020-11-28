@@ -334,12 +334,12 @@ def exercise8():
         trig -= np.sin(phase)**2
         return expfac*trig
 
-    spatial_freqs = np.linspace(0, 6, 100)
+    spat_freqs = np.linspace(0, 6, 100)
     phases = np.linspace(-np.pi, np.pi, 100)
 
     first = (spatial_linest(spatial_freq_ratio=spat_freqs/2)**2 +
         spatial_linest(spatial_freq_ratio=spat_freqs/2, pref_phase=-np.pi/2)**2)
-    plt.plot(spatial_freqs, first)
+    plt.plot(spat_freqs, first)
     plt.title("Numerical spatial linear estimate, dependence on spatial frequance")
     plt.xlabel(r"$K [^\circ]^{-1}$")
     plt.show()
@@ -504,7 +504,7 @@ def exercise12():
 
 
 def exercise13(amplitude=1,
-              )
+              ):
     disparity = np.linspace(0, 2*np.pi, 200)
     response = amplitude**2*(2+np.cos(disparity))
     plt.plot(disparity, response)
@@ -526,5 +526,48 @@ def exercise14(sigma_c = 0.3,  # deg
     plt.plot(ks, response)
     plt.title("Selectivity to spatial frequency")
     plt.xlabel("K [$1/^\circ$]")
+    plt.show()
+
+
+def exercise15(sigma_x = 1,
+               sigma_y = 1,
+               spat_freq = 2,
+               phase = 0,
+               size = 0.6,
+               sigma_c = 0.7,
+               sigma_s = 1.5,
+               b=5
+              ):
+    xs = np.linspace(-5,5, 100)[np.newaxis]
+    ys = np.linspace(-5,5, 100)[:,np.newaxis]
+    gabor = nt.gabor_spatial_rf(xs, ys, sigma_x=sigma_x, sigma_y=sigma_y, 
+                                spat_freq=spat_freq, phase=phase)
+    hw = nt.hubel_wiesel_simple_cell(xs,ys, size=size, sigma_c=sigma_c,
+                                    sigma_s=sigma_s, b=b)
+
+    # Scales for plots
+    scale_max = max(gabor.max(),hw.max())
+    scale_min = min(gabor.min(), hw.min())
+
+    plt.subplot(121)
+    plt.imshow(gabor, cmap="jet")
+    # plt.imshow(gabor, vmin=scale_min, vmax=scale_max, cmap="jet")
+    plt.title("Gabor filter model")
+    plt.colorbar()
+
+    plt.subplot(122)
+    plt.imshow(hw,vmin=scale_min, vmax=scale_max, cmap="jet")
+    plt.title("Hubel-Wiesel model")
+    plt.colorbar()
+
+    plt.show()
+
+
+def exercise16():
+    xs = np.linspace(-5,5, 100)[np.newaxis]
+    ys = np.linspace(-5,5, 100)[:,np.newaxis]
+    plt.imshow(nt.hubel_wiesel_complex_cell(orientation=np.pi/3))
+    plt.title("Spatial receptive field of complex Hubel-Wiesel cell")
+    plt.colorbar()
     plt.show()
 
