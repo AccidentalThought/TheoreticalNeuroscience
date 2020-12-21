@@ -6,6 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import loadmat
 from math import factorial
+from scipy.special import erfc
+
 
 class SpikeTrain(object):
     """Object representing spike train
@@ -510,3 +512,14 @@ def hubel_wiesel_complex_cell(orientation = 0,
         res[res<0] = 0
         model += res
     return model
+
+
+def roc_curve(sigma, r_neg, r_pos, points=100):
+    # erfc goes to zero sufficiently enough to restrict to z such that we
+    # end up with erfc(+-10) ~ 2e-45 
+    z_min = r_neg - 10*np.sqrt(2)*sigma
+    z_max = r_pos + 10*np.sqrt(2)*sigma
+    zs = np.linspace(z_min, z_max, points)
+    alpha = 0.5*erfc((zs-r_neg)/(np.sqrt(2)*sigma))
+    beta = 0.5*erfc((zs-r_pos)/(np.sqrt(2)*sigma))
+    return alpha, beta
