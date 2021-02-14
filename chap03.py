@@ -87,3 +87,50 @@ def exercise2(num_trials = 1000,
     plt.title("ROC curves")
     plt.legend()
     plt.show()
+
+
+def exercise3(trials = 1000,
+              num_thetas = 100,
+              theta_min = -np.pi/2,
+              theta_max = np.pi/2,
+             ):
+    rng = np.random.default_rng()
+    # (trial, theta, selectivity)
+    thetas = np.linspace(theta_min, theta_max, num_thetas)
+    thetas = thetas.reshape(1, num_thetas, 1)
+
+    selectivity = (np.arange(1,8,2)*np.pi/4)
+    selectivity = selectivity.reshape(1,1,4)
+
+    noise = rng.normal(0, 5, (trials, num_thetas, 4))
+
+    rates = 50*np.cos(thetas-selectivity) 
+    rates[rates<0] = 0
+    rates = rates + noise
+    rates[rates<0] = 0
+
+    x = (rates*np.cos(selectivity)).sum(axis=-1)
+    y = (rates*np.sin(selectivity)).sum(axis=-1)
+
+    # Computing estimation
+    # Spliting into quadrants
+    first = (x >= 0)*(np.abs(y) <= x)  # angles (-pi/4; pi/4)
+    second = (y > 0)*(np.abs(x) < y)  # angles(pi/4;3pi/4)
+    third = (y < 0)*(np.abs(x) < -y)  # angles (-3pi/4; -pi/4)
+    fourth = (x < 0)*(y > 0)*(y <= -x)  # angles (3pi/4;pi)
+    fifth = (x < 0)*(y < 0)*(-y <= -x)  # angles(-pi;-3pi/4)
+
+    # Computing the estimations
+    estimation = np.zeros_like(x)
+    estimation[first] = np.arctan((y/x)[first])
+    estimation[second] = np.arctan((-x/y)[second]) + np.pi/2
+    estimation[third] = np.arctan((-x/y)[third]) - np.pi/2
+    estimation[fourth] = np.arctan((y/x)[fourth]) + np.pi
+    estimation[fifth] = np.arctan((y/x)[fifth]) - np.pi
+
+    # Plotting the error
+    error = ((estimation-thetas[...,0])**2).mean(axis=0)
+    plt.plot(thetas[0,:,0]*180/np.pi, np.sqrt(error))
+    plt.title(r"Error of the estimated angle $\theta_{est}$")
+    plt.xlabel(r"$\theta$")
+    plt.show()
